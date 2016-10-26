@@ -1,0 +1,44 @@
+---
+
+- name: Install virtualenv
+  pip: name=virtualenv executable=pip3
+  tags: packages
+
+- name: Create the virtualenv
+  command: virtualenv {{ virtualenv_path }} -p /usr/bin/python3 --no-site-packages
+           creates={{ virtualenv_path }}/bin/activate
+
+- name: Ensure gunicorn is installed
+  pip: virtualenv={{ virtualenv_path }} name=gunicorn
+
+- name: Create the Gunicorn script file
+  template: src=gunicorn_start.j2
+            dest={{ virtualenv_path }}/bin/gunicorn_start
+            owner={{ gunicorn_user }}
+            group={{ gunicorn_group }}
+            mode=0755
+            backup=yes
+  tags: deploy
+
+- name: Create the application log folder
+  file: path={{ application_log_dir }}
+        owner={{ gunicorn_user }}
+        group={{ gunicorn_group }}
+        mode=0774
+        state=directory
+
+- name: Create the application log file
+  file: path={{ application_log_file }}
+        owner={{ gunicorn_user }}
+        group={{ gunicorn_group }}
+        mode=0664
+        state=touch
+
+- name: Setup auto-activation of virtualenv on login
+  lineinfile: dest=/home/{{auto_virtualenv_user}}/.bashrc regexp="bin/activate$" line="cd {{ virtualenv_path }} && source ./bin/activate"
+  when: auto_virtualenv is defined and auto_virtualenv
+
+- name: Create the maintenance page
+  template: src=maintenance_off.html
+            dest={{ virtualenv_path }}/maintenance_off.html
+            mode=0664

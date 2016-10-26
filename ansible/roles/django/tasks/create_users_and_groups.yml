@@ -1,0 +1,26 @@
+---
+
+- name: Create the application group
+  group: name={{ gunicorn_group }} system=yes state=present
+  when: ansible_os_family == "Debian"
+
+- name: Create the application group
+  command: "addgroup {{ gunicorn_group }}"
+  become: yes
+  ignore_errors: true
+  when: ansible_os_family == "Alpine"
+
+- name: Create the application user
+  user: name={{ gunicorn_user }} state=present
+  when: ansible_os_family == "Debian"
+
+- name: Create the application user
+  command: "adduser -D {{ gunicorn_user }} -G {{ gunicorn_group }}"
+  become: yes
+  ignore_errors: true
+  when: ansible_os_family == "Alpine"
+
+- name: Add the application user to the application group
+  user: name={{ gunicorn_user }} group={{ gunicorn_group }} state=present
+  when: ansible_os_family == "Debian"
+

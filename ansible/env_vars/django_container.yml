@@ -1,0 +1,24 @@
+---
+
+# Gunicorn settings. For the number of workers, a good rule to follow is
+# 2 x number of CPUs + 1
+gunicorn_num_workers: 3
+
+# Setting this to 1 will restart the Gunicorn process each time
+# you make a request, basically reloading the code. Very handy
+# when developing. Set to 0 for unlimited requests (default).
+gunicorn_max_requests: 0
+gunicorn_timeout_seconds: 300
+gunicorn_use_reload: yes
+gunicorn_user: django_appc
+gunicorn_group: django_appc
+
+# Django settings
+django_settings_file: "{{ application_name }}.settings"
+
+# Build settings
+build_run_migrations: no
+build_run_collect_static: yes
+build_symlink_build_dir: no
+build_symlink_server_dir: no
+build_symlink_client_dir: no

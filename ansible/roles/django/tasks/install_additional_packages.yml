@@ -1,0 +1,6 @@
+---
+
+- name: Install additional packages
+  apk: name={{ item }} state=installed
+  with_items:
+    - python3

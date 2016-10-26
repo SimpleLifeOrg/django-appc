@@ -1,0 +1,59 @@
+---
+
+- name: Ensure server directory exists
+  file: path="{{ server_path }}"
+        owner={{ gunicorn_user }}
+        group={{ gunicorn_group }}
+        mode=0775
+        state=directory
+  when: copy_server_code is defined and copy_server_code
+
+- name: Copy server directory from build host
+  copy: src="/host/server"
+        dest="/srv/simplelife/server"
+  when: copy_server_code is defined and copy_server_code
+
+- name: Link server directory on vagrant to repo/server
+  file: src="{{ repository_path }}/server"
+        dest="{{ server_path }}"
+        state=link
+  when: link_server_path is defined and link_server_path
+
+- name: Delete all .pyc files
+  command: find . -name '*.pyc' -delete
+  args:
+    chdir: "{{ server_path }}"
+
+- name: Install packages required by the Django app inside virtualenv
+  pip: virtualenv={{ virtualenv_path }} requirements={{ requirements_file }}
+
+- name: Create the static files directory
+  file: path={{ nginx_static_dir }}
+        owner={{ gunicorn_user }}
+        group={{ gunicorn_group }}
+        mode=0775
+        state=directory
+
+- name: Create the Django media files directory
+  file: path={{ nginx_media_dir }}
+        owner={{ gunicorn_user }}
+        group={{ gunicorn_group }}
+        mode=0775
+        state=directory
+  when: link_media_path is not defined or not link_media_path
+
+- name: Link the Django media files directory
+  file: src="{{ media_source_path }}"
+        dest="{{ virtualenv_path }}/media"
+        state=link
+  when: link_media_path is defined and link_media_path
+
+- name: Run Django collectstatic
+  django_manage:
+    command: collectstatic
+    app_path: "{{ server_path }}"
+    virtualenv: "{{ virtualenv_path }}"
+    settings: "{{ django_settings_file }}"
+  environment: "{{ django_environment }}"
+  when: run_django_collectstatic is defined and run_django_collectstatic
+  tags: django.collectstatic

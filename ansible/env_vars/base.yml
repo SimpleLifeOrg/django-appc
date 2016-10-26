@@ -1,0 +1,13 @@
+---
+
+git_repo: git@github.com:SimpleLifeOrg/django_appc.git
+project_name: django_appc
+application_name: django_appc
+application_path: "/srv/{{ application_name }}"
+repository_path: "{{ application_path }}/repo"
+server_path: "{{ application_path }}/server"
+static_path: "{{ application_path }}/static"
+media_path: "{{ application_path }}/media"
+build_source_path: "{{ repository_path }}/build"
+client_source_path: "{{ repository_path }}/client"
+virtualenv_path: "{{ application_path }}"

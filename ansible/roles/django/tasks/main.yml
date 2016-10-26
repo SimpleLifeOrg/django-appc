@@ -1,0 +1,15 @@
+---
+
+- include: install_additional_packages.yml
+  tags: packages
+
+- include: create_users_and_groups.yml
+
+- include: setup_virtualenv.yml
+  tags: virtualenv
+
+- include: setup_django_app.yml
+  tags: deploy
+
+- include: set_file_permissions.yml
+  tags: deploy
